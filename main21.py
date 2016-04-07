@@ -7,35 +7,6 @@ import networkx.algorithms.isomorphism as iso
 from itertools import chain, combinations
 
 
-'''
-	将属性划分为权重的关系
-	高两位为属性关系，讲四种属性关系值赋为权重值
-	若高于两位，则最后一位为符号位，即：
-	1 ，表负关系（负相接，负相切）
-	0 ， 表正关系（正相接， 正相切）
-	符号位和高两位之间若存在位数，则将其附属在后缀中，即权重值中给小数点后第一位：
-	0， 值为 0.0
-	1， 值为0.1
-
-FH = {'1': '-', '0': '+'}
-
-HZ = {'0': '0', '1': '1'}
-
-def getWeight(weightstr):
-	length = len(weightstr)
-	sx = SX.get(weightstr[:2], '-1')
-	fh = '+' if length < 3 else FH.get(weightstr[-1])
-	hz = '0'
-	if length > 3:
-		hz += '.'
-		for x in xrange(3, length):
-			hz += HZ.get(weightstr[2])
-
-	#print sx, hz, fh, type(sx), type(hz), type(fh)
-	weight = eval(fh + '(' + str(sx) + '+'+ str(hz) + ')' )
-	return weight
-
-'''
 SX = {
 	'00': '1', 
 	'01': '2', 
@@ -86,6 +57,28 @@ def loadCSVFile(filepath):
 		cache['edges'] = edges
 	return cache
 
+def writeCSVFile(filename, data=None, line=None):
+	with open(filename, 'a') as f:
+		writer = csv.writer(f)
+		if data:
+			writer.writerow([])
+			writer.writerows(data)
+		if line:
+			writer.writerow([])
+			writer.writerow(line)
+
+def Graph2Data(g, picname):
+	result = [picname]
+	labels = [d.get('name') for n,d in g.nodes(data=True)]
+	edgeLabels = [[u,v,d.get('weight')] for (u, v, d) in g.edges(data=True)]
+	result.extend([labels, edgeLabels])
+	return result
+
+def saveResults(filename, g, picname):
+	data = Graph2Data(g, picname)
+	print data
+	writeCSVFile(filename, data=data)
+	
 def getAllCSVFilesPath(path):
 	#print 'GET ALL PATH!!!'
 	files = os.listdir(path)
@@ -213,9 +206,10 @@ def main(seed_number, minspt, gList):
 					suspicious.append(sg)
 					##
 					#labels=dict((n,d['name']) for n,d in sg.nodes(data=True)) 
-					picname = "./full2/path_"+str(xCount)+'_'+str(tmp)+'_'+str(seed_number)+'_'+str(index)+ "_" + info + "+.png"
+					#picname = "./full2/path_"+str(xCount)+'_'+str(tmp)+'_'+str(seed_number)+'_'+str(index)+ "_" + info + "+.png"
+					saveResults('result.csv', sg, info)
 					#print picname
-					drawPic(sg, picname)
+					#drawPic(sg, picname)
 					##
 				print "@@@: ", nodesGroup
 				#print GM1.mapping
@@ -236,8 +230,17 @@ if __name__ == '__main__':
 	'''
 	somelist = [x for x in powerset(range(20)) if len(x) > 1]
 	print somelist
-	'''
 	
+	data = [[j * i for i in xrange(5)] for j in xrange(5)]
+	print data
+	line = range(5)
+	print line
+	writeCSVFile('haha.csv', data=data)
+	writeCSVFile('haha.csv', line=line)
+
+	'''
+
+
 	path = '../12,27'
 	gList = getAllGraphs(path)
 	amount = len(gList)
@@ -246,8 +249,6 @@ if __name__ == '__main__':
 	#print '--amount/2 + 1=', amount/2 + 1
 	for s in xrange(amount):
 		main(s, minsup, gList)
-
-
 
 
 	'''
